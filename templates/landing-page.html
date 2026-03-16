@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, sans-serif; color: #1a1a2e; background: #fff; }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 24px; font-weight: 800; color: #4361ee; }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { text-decoration: none; color: #555; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: #4361ee; }
+        .nav-cta { background: #4361ee; color: #fff; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s; }
+        .nav-cta:hover { transform: translateY(-2px); }
+
+        .hero { display: flex; align-items: center; justify-content: space-between; padding: 80px 5%; max-width: 1200px; margin: 0 auto; gap: 60px; }
+        .hero-text { flex: 1; }
+        .hero-text h1 { font-size: 52px; line-height: 1.15; margin-bottom: 24px; color: #0f0f23; }
+        .hero-text h1 span { color: #4361ee; }
+        .hero-text p { font-size: 18px; color: #666; line-height: 1.7; margin-bottom: 36px; }
+        .hero-actions { display: flex; gap: 16px; }
+        .btn-primary { background: #4361ee; color: #fff; padding: 16px 36px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary:hover { background: #3651d4; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(67,97,238,0.3); }
+        .btn-secondary { background: transparent; color: #4361ee; padding: 16px 36px; border-radius: 12px; font-size: 16px; font-weight: 700; border: 2px solid #4361ee; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary:hover { background: #f0f4ff; }
+        .hero-visual { flex: 1; display: flex; justify-content: center; }
+        .hero-img { width: 100%; max-width: 480px; height: 360px; background: linear-gradient(135deg, #4361ee 0%, #7c3aed 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+
+        .features { padding: 100px 5%; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .features h2 { font-size: 36px; margin-bottom: 16px; }
+        .features > p { color: #666; font-size: 18px; margin-bottom: 60px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
+        .feature-card { padding: 40px 32px; border-radius: 16px; background: #f8f9ff; text-align: left; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .feature-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 20px; margin-bottom: 12px; }
+        .feature-card p { color: #666; line-height: 1.7; }
+
+        .cta { text-align: center; padding: 100px 5%; background: linear-gradient(135deg, #4361ee, #7c3aed); color: #fff; margin-top: 60px; }
+        .cta h2 { font-size: 40px; margin-bottom: 16px; }
+        .cta p { font-size: 18px; opacity: 0.9; margin-bottom: 36px; }
+        .cta .btn-primary { background: #fff; color: #4361ee; }
+        .cta .btn-primary:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+
+        footer { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; padding: 40px 5%; text-align: center; }
+            .hero-text h1 { font-size: 32px; }
+            .hero-actions { justify-content: center; flex-wrap: wrap; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">AppName</div>
+        <ul class="nav-links">
+            <li><a href="#features">機能</a></li>
+            <li><a href="#pricing">料金</a></li>
+            <li><a href="#contact">お問い合わせ</a></li>
+        </ul>
+        <a href="#" class="nav-cta">無料で始める</a>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1>あなたのビジネスを<span>次のレベル</span>へ</h1>
+            <p>シンプルで使いやすいツールで、チームの生産性を最大化。今すぐ始めて、違いを実感してください。</p>
+            <div class="hero-actions">
+                <button class="btn-primary">無料トライアル</button>
+                <button class="btn-secondary">デモを見る</button>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-img">🚀</div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>なぜ選ばれるのか</h2>
+        <p>3つの特徴であなたのワークフローを革新します</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background:#e0f2fe;">⚡</div>
+                <h3>高速パフォーマンス</h3>
+                <p>最適化されたアーキテクチャにより、ミリ秒単位のレスポンスを実現。ストレスフリーな体験を提供します。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:#fce7f3;">🔒</div>
+                <h3>安全なセキュリティ</h3>
+                <p>エンドツーエンドの暗号化と多要素認証で、大切なデータを守ります。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:#ecfdf5;">🎯</div>
+                <h3>直感的なUI</h3>
+                <p>誰でもすぐに使えるシンプルなデザイン。複雑な設定は一切不要です。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>今すぐ始めましょう</h2>
+        <p>14日間の無料トライアル。クレジットカード不要。</p>
+        <button class="btn-primary">無料で登録する →</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 AppName. All rights reserved.</p>
+    </footer>
+</body>
+</html>

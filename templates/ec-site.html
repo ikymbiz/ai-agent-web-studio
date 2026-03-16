@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC Shop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #fff; color: #111; }
+
+        header { border-bottom: 1px solid #eee; padding: 16px 5%; display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
+        .logo { font-size: 24px; font-weight: 800; }
+        .header-search { flex: 1; max-width: 480px; margin: 0 40px; position: relative; }
+        .header-search input { width: 100%; padding: 12px 20px 12px 44px; border: 2px solid #eee; border-radius: 999px; font-size: 14px; outline: none; transition: border 0.2s; }
+        .header-search input:focus { border-color: #111; }
+        .header-search::before { content: '🔍'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+        .header-icons { display: flex; gap: 20px; align-items: center; }
+        .icon-btn { position: relative; font-size: 22px; cursor: pointer; }
+        .cart-badge { position: absolute; top: -8px; right: -10px; background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .categories { display: flex; gap: 12px; padding: 16px 5%; max-width: 1400px; margin: 0 auto; overflow-x: auto; }
+        .cat-btn { padding: 8px 20px; border-radius: 999px; border: 1px solid #e5e5e5; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .cat-btn.active { background: #111; color: #fff; border-color: #111; }
+        .cat-btn:hover:not(.active) { border-color: #111; }
+
+        .products { max-width: 1400px; margin: 0 auto; padding: 32px 5%; }
+        .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .products-header h2 { font-size: 22px; }
+        .sort-select { padding: 8px 16px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+        .product-card { cursor: pointer; transition: transform 0.2s; }
+        .product-card:hover { transform: translateY(-4px); }
+        .product-img { aspect-ratio: 1; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 64px; margin-bottom: 14px; position: relative; overflow: hidden; }
+        .product-img .tag { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .tag-sale { background: #ef4444; color: #fff; }
+        .tag-new { background: #111; color: #fff; }
+        .product-card .wish-btn { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .product-card .wish-btn:hover { background: #fef2f2; }
+        .product-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .product-price { display: flex; align-items: center; gap: 8px; }
+        .product-price .current { font-size: 18px; font-weight: 800; }
+        .product-price .original { font-size: 14px; color: #999; text-decoration: line-through; }
+        .product-rating { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 13px; color: #666; }
+        .stars { color: #f59e0b; }
+        .add-cart-btn { width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px; border: 2px solid #111; background: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .add-cart-btn:hover { background: #111; color: #fff; }
+
+        .promo-banner { max-width: 1400px; margin: 20px auto; padding: 0 5%; }
+        .promo { display: flex; align-items: center; justify-content: space-between; padding: 40px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; }
+        .promo h3 { font-size: 24px; margin-bottom: 8px; }
+        .promo p { color: #92400e; margin-bottom: 16px; }
+        .promo-btn { padding: 12px 28px; background: #111; color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .promo-icon { font-size: 72px; }
+
+        footer { text-align: center; padding: 48px 20px; border-top: 1px solid #eee; margin-top: 60px; color: #999; font-size: 14px; }
+
+        @media (max-width: 768px) {
+            .header-search { display: none; }
+            .promo { flex-direction: column; text-align: center; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">SHOP</div>
+        <div class="header-search"><input type="text" placeholder="商品を検索..."></div>
+        <div class="header-icons">
+            <span class="icon-btn">👤</span>
+            <span class="icon-btn">🛒<span class="cart-badge" id="cart-count">0</span></span>
+        </div>
+    </header>
+
+    <div class="categories">
+        <button class="cat-btn active" onclick="filterCat('all', this)">すべて</button>
+        <button class="cat-btn" onclick="filterCat('tops', this)">トップス</button>
+        <button class="cat-btn" onclick="filterCat('bottoms', this)">ボトムス</button>
+        <button class="cat-btn" onclick="filterCat('outer', this)">アウター</button>
+        <button class="cat-btn" onclick="filterCat('accessories', this)">アクセサリー</button>
+        <button class="cat-btn" onclick="filterCat('shoes', this)">シューズ</button>
+    </div>
+
+    <div class="promo-banner">
+        <div class="promo">
+            <div>
+                <h3>春の新作セール 🌸</h3>
+                <p>対象商品が最大30% OFF！期間限定でお見逃しなく。</p>
+                <button class="promo-btn">セール会場へ →</button>
+            </div>
+            <div class="promo-icon">🛍️</div>
+        </div>
+    </div>
+
+    <section class="products">
+        <div class="products-header">
+            <h2>人気アイテム</h2>
+            <select class="sort-select" onchange="sortProducts(this.value)">
+                <option value="popular">人気順</option>
+                <option value="price-low">価格が安い順</option>
+                <option value="price-high">価格が高い順</option>
+                <option value="new">新着順</option>
+            </select>
+        </div>
+        <div class="products-grid" id="products-grid"></div>
+    </section>
+
+    <footer><p>&copy; 2026 SHOP. All rights reserved.</p></footer>
+
+    <script>
+        let cartCount = 0;
+        const products = [
+            { id:1, name:'プレミアムTシャツ', price:4980, original:6980, cat:'tops', rating:4.8, reviews:124, tag:'sale', emoji:'👕', bg:'#f0f9ff' },
+            { id:2, name:'スリムフィットデニム', price:8980, original:null, cat:'bottoms', rating:4.6, reviews:89, tag:'new', emoji:'👖', bg:'#fdf4ff' },
+            { id:3, name:'レザージャケット', price:24800, original:32800, cat:'outer', rating:4.9, reviews:56, tag:'sale', emoji:'🧥', bg:'#fefce8' },
+            { id:4, name:'キャンバススニーカー', price:7980, original:null, cat:'shoes', rating:4.7, reviews:203, tag:'new', emoji:'👟', bg:'#f0fdf4' },
+            { id:5, name:'シルバーリング', price:3480, original:null, cat:'accessories', rating:4.5, reviews:67, tag:null, emoji:'💍', bg:'#faf5ff' },
+            { id:6, name:'オーバーサイズパーカー', price:6980, original:9800, cat:'tops', rating:4.4, reviews:145, tag:'sale', emoji:'🧤', bg:'#fff1f2' },
+            { id:7, name:'ワイドパンツ', price:5980, original:null, cat:'bottoms', rating:4.3, reviews:78, tag:null, emoji:'👖', bg:'#ecfdf5' },
+            { id:8, name:'トートバッグ', price:4580, original:null, cat:'accessories', rating:4.6, reviews:92, tag:'new', emoji:'👜', bg:'#eff6ff' },
+        ];
+
+        let currentCat = 'all';
+
+        function filterCat(cat, btn) {
+            currentCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts();
+        }
+
+        function sortProducts(method) { renderProducts(method); }
+
+        function addToCart() {
+            cartCount++;
+            document.getElementById('cart-count').textContent = cartCount;
+        }
+
+        function renderProducts(sort = 'popular') {
+            let filtered = currentCat === 'all' ? [...products] : products.filter(p => p.cat === currentCat);
+            if (sort === 'price-low') filtered.sort((a,b) => a.price - b.price);
+            else if (sort === 'price-high') filtered.sort((a,b) => b.price - a.price);
+
+            document.getElementById('products-grid').innerHTML = filtered.map(p => `
+                <div class="product-card">
+                    <div class="product-img" style="background:${p.bg}">
+                        ${p.tag ? `<span class="tag ${p.tag === 'sale' ? 'tag-sale' : 'tag-new'}">${p.tag === 'sale' ? 'SALE' : 'NEW'}</span>` : ''}
+                        <button class="wish-btn">♡</button>
+                        <span style="font-size:64px">${p.emoji}</span>
+                    </div>
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">
+                        <span class="current">¥${p.price.toLocaleString()}</span>
+                        ${p.original ? `<span class="original">¥${p.original.toLocaleString()}</span>` : ''}
+                    </div>
+                    <div class="product-rating">
+                        <span class="stars">${'★'.repeat(Math.floor(p.rating))}${'☆'.repeat(5 - Math.floor(p.rating))}</span>
+                        ${p.rating} (${p.reviews})
+                    </div>
+                    <button class="add-cart-btn" onclick="addToCart()">カートに追加</button>
+                </div>
+            `).join('');
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
