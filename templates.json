@@ -1,0 +1,58 @@
+[
+  {
+    "id": "landing-page",
+    "name": "ランディングページ",
+    "description": "ヒーローセクション・特徴・CTA付きのモダンなLP",
+    "icon": "🚀",
+    "color": "#3b82f6",
+    "file": "landing-page.html"
+  },
+  {
+    "id": "portfolio",
+    "name": "ポートフォリオ",
+    "description": "作品ギャラリー・自己紹介・スキル表示",
+    "icon": "🎨",
+    "color": "#8b5cf6",
+    "file": "portfolio.html"
+  },
+  {
+    "id": "todo-app",
+    "name": "ToDoアプリ",
+    "description": "タスク管理・フィルター・localStorage保存",
+    "icon": "✅",
+    "color": "#10b981",
+    "file": "todo-app.html"
+  },
+  {
+    "id": "dashboard",
+    "name": "ダッシュボード",
+    "description": "統計カード・チャート・データテーブル",
+    "icon": "📊",
+    "color": "#f59e0b",
+    "file": "dashboard.html"
+  },
+  {
+    "id": "blog",
+    "name": "ブログ",
+    "description": "記事一覧・カテゴリ・レスポンシブレイアウト",
+    "icon": "📝",
+    "color": "#ef4444",
+    "file": "blog.html"
+  },
+  {
+    "id": "ec-site",
+    "name": "ECサイト風",
+    "description": "商品カード・カート・フィルター検索",
+    "icon": "🛒",
+    "color": "#ec4899",
+    "file": "ec-site.html"
+  },
+  {
+    "id": "chat-app",
+    "name": "チャットアプリ",
+    "description": "メッセージUI・会話リスト・リアルタイム風",
+    "icon": "💬",
+    "color": "#06b6d4",
+    "file": "chat-app.html"
+  }
+]
