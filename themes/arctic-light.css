@@ -1,0 +1,31 @@
+:root {
+  --color-bg-deep: #f0f2f5;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #e5e7eb;
+  --color-border: #d1d5db;
+  --color-border-focus: #9ca3af;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --bg: #f0f2f5;
+  --sidebar: #ffffff;
+  --text: #1f2937;
+  --user-msg: #e5e7eb;
+  --ai-msg: #f0f2f5;
+  --primary: #2563eb;
+  --accent: #7c3aed;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+body { color: #1f2937; }
+.msg.ai { color: #1f2937; }
+.tab-btn { color: #6b7280; }
+.tab-btn.active { color: #1f2937; border-bottom-color: #1f2937; }
+#user-prompt, #debug-memo { color: #1f2937; }
+#user-prompt::placeholder, #debug-memo::placeholder { color: #9ca3af; }
+textarea.setting-input, select.setting-input, input[type="password"] { color: #1f2937; }
+.modal { color: #1f2937; }
+.header-title { color: #6b7280; }
+.msg-content { color: #1f2937; }
+.theme-card-name { color: #1f2937; }
+.template-name { color: #1f2937; }

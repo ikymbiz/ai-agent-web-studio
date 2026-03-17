@@ -1,1 +1,50 @@
-
+[
+  {
+    "id": "default",
+    "name": "Obsidian Terminal",
+    "description": "デフォルトのダークテーマ",
+    "icon": "🖤",
+    "preview": "#0D0F14",
+    "file": null
+  },
+  {
+    "id": "midnight-blue",
+    "name": "Midnight Blue",
+    "description": "深い青のナイトモード",
+    "icon": "🌊",
+    "preview": "#0b1121",
+    "file": "midnight-blue.css"
+  },
+  {
+    "id": "forest-green",
+    "name": "Forest Green",
+    "description": "落ち着いた森のグリーン",
+    "icon": "🌲",
+    "preview": "#0a120a",
+    "file": "forest-green.css"
+  },
+  {
+    "id": "warm-mocha",
+    "name": "Warm Mocha",
+    "description": "温かみのあるブラウン",
+    "icon": "☕",
+    "preview": "#1a1412",
+    "file": "warm-mocha.css"
+  },
+  {
+    "id": "cyber-pink",
+    "name": "Cyber Pink",
+    "description": "サイバーパンク風ネオン",
+    "icon": "🌸",
+    "preview": "#1a0a18",
+    "file": "cyber-pink.css"
+  },
+  {
+    "id": "arctic-light",
+    "name": "Arctic Light",
+    "description": "目に優しいライトテーマ",
+    "icon": "🏔️",
+    "preview": "#f0f2f5",
+    "file": "arctic-light.css"
+  }
+]

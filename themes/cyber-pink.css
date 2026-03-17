@@ -1,0 +1,16 @@
+:root {
+  --color-bg-deep: #1a0a18;
+  --color-bg-surface: #241220;
+  --color-bg-elevated: #35182e;
+  --color-border: #4a1f42;
+  --color-border-focus: #ec4899;
+  --color-text-primary: #fce7f3;
+  --color-text-secondary: #9d5c8a;
+  --color-text-muted: #4a2040;
+  --bg: #1a0a18;
+  --sidebar: #241220;
+  --user-msg: #35182e;
+  --ai-msg: #1a0a18;
+  --primary: #ec4899;
+  --accent: #f472b6;
+}
