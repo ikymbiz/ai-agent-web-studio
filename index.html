@@ -162,7 +162,7 @@
         .field-row { display: flex; gap: 15px; margin-bottom: 20px; }
         .field { flex: 1; margin-bottom: 20px; }
         label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 8px; font-weight: bold; letter-spacing: 0.05em; font-family: var(--font-display); }
-        input[type="password"], textarea.setting-input, select.setting-input { width: 100%; background: var(--color-bg-elevated); border: 1px solid var(--color-border-focus); border-radius: 8px; padding: 12px; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; font-family: var(--font-body); }
+        input[type="password"], .api-key-input, textarea.setting-input, select.setting-input { width: 100%; background: var(--color-bg-elevated); border: 1px solid var(--color-border-focus); border-radius: 8px; padding: 12px; color: #fff; font-size: 14px; outline: none; transition: border 0.2s; font-family: var(--font-body); }
         input:focus, textarea:focus, select:focus { border-color: var(--primary); }
         select.setting-input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C2.185 5.355 2.402 5 2.805 5h9.39c.403 0 .62.355.354.658l-4.796 5.482a.5.5 0 0 1-.748 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
         .save-btn { background: #fff; color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; transition: 0.2s; font-family: var(--font-body); }
@@ -214,6 +214,26 @@
         .theme-color-hex { flex: 1; background: var(--color-bg-elevated); border: 1px solid var(--color-border); border-radius: 6px; padding: 4px 8px; color: var(--color-text-primary); font-size: 12px; font-family: var(--font-mono); outline: none; }
         .theme-preview-bar { display: flex; border-radius: 8px; overflow: hidden; height: 32px; margin-top: 8px; border: 1px solid var(--color-border); }
         .theme-preview-bar div { flex: 1; }
+
+        /* プロバイダー / プロンプト設定 */
+        .provider-row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .provider-row .field { flex: 1; }
+        .field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .field-header label { margin-bottom: 0; }
+        .reset-default-btn { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 10px; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-family: var(--font-body); transition: 0.2s; white-space: nowrap; }
+        .reset-default-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .api-key-field { transition: opacity 0.2s; }
+        details.prompt-details { margin-bottom: 20px; }
+        details.prompt-details summary { cursor: pointer; font-size: 11px; font-weight: bold; color: var(--color-text-secondary); letter-spacing: 0.05em; font-family: var(--font-display); padding: 8px 0; }
+        details.prompt-details textarea { width: 100%; background: var(--color-bg-elevated); border: 1px solid var(--color-border-focus); border-radius: 8px; padding: 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono); resize: vertical; margin-bottom: 10px; }
+        .prompt-hint { font-size: 10px; color: var(--color-text-muted); margin: -6px 0 10px; }
+
+        /* テンプレート追加カード＆アクション */
+        .template-new-card { min-width: 150px; max-width: 150px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px 12px; background: transparent; border: 2px dashed var(--color-border); border-radius: 12px; cursor: pointer; color: var(--color-text-secondary); font-size: 11px; font-weight: 600; transition: all 0.2s; font-family: var(--font-body); scroll-snap-align: start; }
+        .template-new-card:hover { border-color: var(--primary); color: var(--primary); }
+        .template-card-actions { position: absolute; top: 4px; right: 4px; display: none; gap: 2px; }
+        .template-card:hover .template-card-actions { display: flex; }
+        .template-card { position: relative; }
     </style>
 </head>
 <body>
@@ -257,7 +277,7 @@
                 <input type="file" id="file-files" accept="*/*" style="display:none" onchange="handleAttachment(this)">
 
                 <textarea id="user-prompt" placeholder="例：ダークモードのTodoアプリを作りたい..." rows="1" oninput="autoGrow(this)"></textarea>
-                <button class="send-btn" id="send-btn" onclick="askGemini()">↑</button>
+                <button class="send-btn" id="send-btn" onclick="askAI()">↑</button>
             </div>
         </div>
     </div>
@@ -287,38 +307,75 @@
     </div>
 
     <div id="p-settings" class="page settings">
-        <div class="field-row">
-            <div class="field">
-                <label>CHAT MODEL (PLAN)</label>
-                <select id="chat-model" class="setting-input">
-                    <option value="gemini-3-flash-preview">3 Flash (Fast & Frontier)</option>
-                    <option value="gemini-2.5-flash" selected>2.5 Flash (Balanced)</option>
-                    <option value="gemini-2.5-pro">2.5 Pro (High-Quality Reasoning)</option>
-                    <option value="deep-research-pro-preview-12-2025">Deep Research (Agentic Plan)</option>
+        <div class="provider-row">
+            <div class="field" style="flex:0 0 auto; min-width:140px;">
+                <label>AI PROVIDER</label>
+                <select id="ai-provider" class="setting-input" onchange="onProviderChange()">
+                    <option value="gemini">Google Gemini</option>
+                    <option value="openai">OpenAI (GPT)</option>
+                    <option value="claude">Anthropic (Claude)</option>
+                    <option value="xai">xAI (Grok)</option>
+                    <option value="groq">Groq</option>
                 </select>
             </div>
             <div class="field">
-                 <label>CODE MODEL (BUILD)</label>
-                <select id="code-model" class="setting-input">
-                    <option value="gemini-3.1-pro-preview">3.1 Pro (Vibe Coding / Best)</option>
-                    <option value="gemini-2.5-pro">2.5 Pro (Deep Reasoning)</option>
-                    <option value="gemini-2.5-flash" selected>2.5 Flash (Balanced)</option>
-                    <option value="gemini-3-flash-preview">3 Flash (High-Speed Build)</option>
-                 </select>
+                <label>CHAT MODEL (PLAN)</label>
+                <select id="chat-model" class="setting-input"></select>
+            </div>
+            <div class="field">
+                <label>CODE MODEL (BUILD)</label>
+                <select id="code-model" class="setting-input"></select>
             </div>
         </div>
-        <div class="field">
-            <label>API KEY</label>
-            <input type="password" id="api-key" placeholder="AIzaSy... (未設定時はプロキシを使用します)" oninput="toggleModelSelects()">
+        <div id="api-keys-section">
+            <div class="field api-key-field" data-provider="gemini">
+                <label>API KEY — GEMINI</label>
+                <input type="password" id="api-key-gemini" class="api-key-input" placeholder="Gemini APIキー（未設定時はプロキシ使用）" oninput="toggleModelSelects()">
+            </div>
+            <div class="field api-key-field" data-provider="openai" style="display:none;">
+                <label>API KEY — OPENAI</label>
+                <input type="password" id="api-key-openai" class="api-key-input" placeholder="sk-... (OpenAI APIキー)" oninput="toggleModelSelects()">
+            </div>
+            <div class="field api-key-field" data-provider="claude" style="display:none;">
+                <label>API KEY — CLAUDE</label>
+                <input type="password" id="api-key-claude" class="api-key-input" placeholder="sk-ant-... (Anthropic APIキー)" oninput="toggleModelSelects()">
+            </div>
+            <div class="field api-key-field" data-provider="xai" style="display:none;">
+                <label>API KEY — GROK (xAI)</label>
+                <input type="password" id="api-key-xai" class="api-key-input" placeholder="xai-... (xAI APIキー)" oninput="toggleModelSelects()">
+            </div>
+            <div class="field api-key-field" data-provider="groq" style="display:none;">
+                <label>API KEY — GROQ</label>
+                <input type="password" id="api-key-groq" class="api-key-input" placeholder="gsk_... (Groq APIキー)" oninput="toggleModelSelects()">
+            </div>
         </div>
         <div class="field">
             <label>GITHUB TOKEN</label>
             <input type="password" id="setting-gh-token" placeholder="ghp_... (GitHub Deploy用)">
         </div>
         <div class="field">
-            <label>DEVELOPER PROFILE</label>
-            <textarea id="user-profile" class="setting-input" rows="6" placeholder="例：Tailwind CSSを使用。日本語コメント。モダンなダークモード。"></textarea>
+            <div class="field-header"><label>SYSTEM PROMPT</label><button class="reset-default-btn" onclick="resetFieldDefault('system-prompt')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="system-prompt" class="setting-input" rows="3"></textarea>
         </div>
+        <div class="field">
+            <div class="field-header"><label>DEVELOPER PROFILE</label><button class="reset-default-btn" onclick="resetFieldDefault('user-profile')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="user-profile" class="setting-input" rows="4"></textarea>
+        </div>
+        <div class="field">
+            <div class="field-header"><label>CODE PRINCIPLES</label><button class="reset-default-btn" onclick="resetFieldDefault('code-principles')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="code-principles" class="setting-input" rows="3"></textarea>
+        </div>
+        <details class="prompt-details">
+            <summary>PROMPT TEMPLATES（詳細設定）</summary>
+            <div class="field-header"><label style="font-size:10px;">PLANプロンプト（チャット用）</label><button class="reset-default-btn" onclick="resetFieldDefault('prompt-plan')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="prompt-plan" rows="5"></textarea>
+            <div class="prompt-hint">変数: {prof}, {codeContext}, {systemPrompt}</div>
+            <div class="field-header"><label style="font-size:10px;">要件おまかせ プロンプト</label><button class="reset-default-btn" onclick="resetFieldDefault('prompt-suggest')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="prompt-suggest" rows="3"></textarea>
+            <div class="field-header"><label style="font-size:10px;">修正依頼 プロンプト</label><button class="reset-default-btn" onclick="resetFieldDefault('prompt-debug')" title="デフォルトに戻す">↺ 初期値</button></div>
+            <textarea id="prompt-debug" rows="5"></textarea>
+            <div class="prompt-hint">変数: {memoText}</div>
+        </details>
         <button class="save-btn" id="save-btn" onclick="saveSettings()">設定を保存</button>
 
         <div class="theme-section">
@@ -492,6 +549,41 @@
     </div>
 </div>
 
+<!-- Template Editor Modal -->
+<div id="tpl-editor-modal" class="modal-overlay" onclick="if(event.target===this)closeTemplateEditor()">
+    <div class="modal" style="max-width:500px;">
+        <div class="modal-header">
+            <h3 id="tpl-editor-title">📄 テンプレートを追加</h3>
+            <button class="modal-close" onclick="closeTemplateEditor()">✕</button>
+        </div>
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">テンプレート名</label>
+                    <input id="tple-name" class="modal-input" placeholder="My Template" style="margin:0;">
+                </div>
+                <div style="width:70px;">
+                    <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">アイコン</label>
+                    <input id="tple-icon" class="modal-input" placeholder="📄" maxlength="4" style="margin:0;">
+                </div>
+            </div>
+            <div>
+                <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">説明</label>
+                <input id="tple-desc" class="modal-input" placeholder="テンプレートの説明" style="margin:0;">
+            </div>
+            <div>
+                <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">HTMLコード</label>
+                <textarea id="tple-code" class="modal-input" rows="10" style="margin:0; font-family:var(--font-mono); font-size:12px; resize:vertical;" placeholder="<!DOCTYPE html>..."></textarea>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="modal-btn" onclick="triggerTplFileUpload()" style="flex:0; background:var(--color-bg-elevated); width:auto; padding:10px 16px; margin-top:0;">📁 ファイル読込</button>
+                <input type="file" id="tpl-file-input" accept=".html" style="display:none" onchange="handleTplFileUpload(this)">
+                <button class="modal-btn" onclick="saveCustomTemplate()" style="flex:1;">💾 保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     /* --- 状態管理変数 --- */
     let currentImageBase64 = null;
@@ -503,6 +595,181 @@
     let ghImportRepos = [];
     let swRegistration = null;
     const PROXY_WORKER_URL = 'https://green-credit-a6fb.ikymbiz.workers.dev';
+
+    /* --- プロバイダー設定 --- */
+    const PROVIDER_MODELS = {
+        gemini: {
+            chat: [['gemini-2.5-flash','2.5 Flash (Balanced)'],['gemini-3-flash-preview','3 Flash (Fast)'],['gemini-2.5-pro','2.5 Pro (Reasoning)'],['deep-research-pro-preview-12-2025','Deep Research']],
+            code: [['gemini-2.5-flash','2.5 Flash (Balanced)'],['gemini-3.1-pro-preview','3.1 Pro (Vibe Coding)'],['gemini-2.5-pro','2.5 Pro (Reasoning)'],['gemini-3-flash-preview','3 Flash (Fast)']]
+        },
+        openai: {
+            chat: [['gpt-4o','GPT-4o'],['gpt-4o-mini','GPT-4o mini'],['o3-mini','o3-mini']],
+            code: [['gpt-4o','GPT-4o'],['gpt-4.1','GPT-4.1'],['o3-mini','o3-mini']]
+        },
+        claude: {
+            chat: [['claude-sonnet-4-20250514','Claude Sonnet 4'],['claude-haiku-3-5-20241022','Claude Haiku 3.5']],
+            code: [['claude-sonnet-4-20250514','Claude Sonnet 4'],['claude-opus-4-20250918','Claude Opus 4']]
+        },
+        xai: {
+            chat: [['grok-3','Grok 3'],['grok-3-mini','Grok 3 Mini']],
+            code: [['grok-3','Grok 3'],['grok-3-mini','Grok 3 Mini']]
+        },
+        groq: {
+            chat: [['llama-3.3-70b-versatile','Llama 3.3 70B'],['mixtral-8x7b-32768','Mixtral 8x7B']],
+            code: [['llama-3.3-70b-versatile','Llama 3.3 70B']]
+        }
+    };
+
+    const DEFAULT_PROMPT_PLAN = `あなたはプロのWeb開発ディレクターです。ユーザーのアイディアを具体化し、実装（BUILD）に向けた設計図を作成します。\n{systemPrompt}\nプロファイル: {prof}\nガイドライン: 1. アプリ名、ターゲット、機能をヒアリング。2. 簡潔に箇条書きで返答。3. コードは書かず、仕様合意に徹する。4. 仕様が固まったら「素晴らしいプランです。⚡️コードを作成 ボタンから実装を開始しましょう」と促す。5. ユーザーの要望がまだ曖昧な場合や、次のステップを提案したい場合は、会話の最後に「次に進むための要件を提案しましょうか？✨ 要件をおまかせ ボタンから次のステップを提案できます。」と応答する。{codeContext}`;
+    const DEFAULT_PROMPT_SUGGEST = `現在の会話履歴とコードを元に、次に開発すべき最適な要件やアイデアを具体的に提案してください。もし要件が不足していれば、自律的に補完して完全なプランを提示してください。`;
+    const DEFAULT_PROMPT_DEBUG = `あなたはプロのWeb開発ディレクターです。次の修整依頼に対して、バグの報告かどうか判断してください。バグの場合は要因を確認してください。要因が判明したら改善策を検討してください。要因が判明しない場合は、要因切分けのためのログや反応を取得するためのコードを検討してください。最後に、前回のコード生成から現在までで修整する要件を整理してください。【修正依頼】\n{memoText}`;
+    const DEFAULT_SYSTEM_PROMPT = `日本語で応答してください。セキュリティとパフォーマンスを重視し、レスポンシブデザインを必須とします。`;
+    const DEFAULT_USER_PROFILE = `モダンなUI/UXを重視。Tailwind CSSやCDNライブラリの活用OK。日本語コメントでコードを記述。ダークモード対応を推奨。`;
+    const DEFAULT_CODE_PRINCIPLES = `セマンティックHTML。アクセシビリティ（ARIA）対応。モバイルファースト設計。パフォーマンス最適化（lazy load等）。`;
+
+    const FIELD_DEFAULTS = {
+        'system-prompt': DEFAULT_SYSTEM_PROMPT,
+        'user-profile': DEFAULT_USER_PROFILE,
+        'code-principles': DEFAULT_CODE_PRINCIPLES,
+        'prompt-plan': DEFAULT_PROMPT_PLAN,
+        'prompt-suggest': DEFAULT_PROMPT_SUGGEST,
+        'prompt-debug': DEFAULT_PROMPT_DEBUG
+    };
+
+    function resetFieldDefault(fieldId) {
+        const def = FIELD_DEFAULTS[fieldId];
+        if (def !== undefined) {
+            document.getElementById(fieldId).value = def;
+            showToast('デフォルト値に戻しました');
+        }
+    }
+
+    function getCurrentApiKey() {
+        const provider = document.getElementById('ai-provider').value;
+        const el = document.getElementById('api-key-' + provider);
+        return el ? el.value.trim() : '';
+    }
+
+    function onProviderChange() {
+        const provider = document.getElementById('ai-provider').value;
+        updateModelOptions('chat-model', PROVIDER_MODELS[provider].chat);
+        updateModelOptions('code-model', PROVIDER_MODELS[provider].code);
+        // Show/hide API key fields
+        document.querySelectorAll('.api-key-field').forEach(el => {
+            el.style.display = el.dataset.provider === provider ? '' : 'none';
+        });
+        toggleModelSelects();
+    }
+    function updateModelOptions(selectId, models) {
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = models.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+    }
+
+    /* --- LLM統一呼び出し --- */
+    async function callLLM({ prompt, stream = false, model, images = [] }) {
+        const provider = document.getElementById('ai-provider').value;
+        const key = getCurrentApiKey();
+        if (!key) {
+            const res = await fetch(PROXY_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
+            const data = await res.json();
+            return { text: data.candidates ? data.candidates[0].content.parts[0].text : (data.response || data.text || JSON.stringify(data)) };
+        }
+        switch(provider) {
+            case 'gemini': return callGemini(key, model, prompt, stream, images);
+            case 'openai': return callOpenAI(key, model, prompt, stream, images);
+            case 'claude': return callClaude(key, model, prompt, stream, images);
+            case 'xai':    return callXAI(key, model, prompt, stream, images);
+            case 'groq':   return callGroq(key, model, prompt, stream, images);
+            default:       return callGemini(key, model, prompt, stream, images);
+        }
+    }
+
+    async function callGemini(key, model, prompt, stream, images) {
+        const parts = [{ text: prompt }];
+        images.forEach(img => parts.push({ inline_data: { mime_type: img.mime, data: img.base64 } }));
+        if (stream) {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ role: 'user', parts }] })
+            });
+            if (!res.ok) throw new Error(`API Error: ${res.status}`);
+            return { reader: res.body.getReader(), parseChunk: (line) => { try { const d = JSON.parse(line.slice(6)); return d.candidates?.[0]?.content?.parts?.[0]?.text || ''; } catch(e) { return ''; } }, prefix: 'data: ' };
+        } else {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts }] })
+            });
+            const data = await res.json(); if (data.error) throw new Error(data.error.message);
+            return { text: data.candidates[0].content.parts[0].text };
+        }
+    }
+
+    function buildOpenAIBody(model, prompt, stream, images) {
+        const content = [{ type: 'text', text: prompt }];
+        images.forEach(img => content.push({ type: 'image_url', image_url: { url: `data:${img.mime};base64,${img.base64}` } }));
+        return { model, stream, messages: [{ role: 'user', content: images.length ? content : prompt }] };
+    }
+
+    async function callOpenAI(key, model, prompt, stream, images) {
+        const body = buildOpenAIBody(model, prompt, stream, images);
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        if (stream) {
+            return { reader: res.body.getReader(), parseChunk: (line) => { try { const d = JSON.parse(line.slice(6)); return d.choices?.[0]?.delta?.content || ''; } catch(e) { return ''; } }, prefix: 'data: ' };
+        }
+        const data = await res.json(); if (data.error) throw new Error(data.error.message);
+        return { text: data.choices[0].message.content };
+    }
+
+    async function callClaude(key, model, prompt, stream, images) {
+        const content = [];
+        images.forEach(img => content.push({ type: 'image', source: { type: 'base64', media_type: img.mime, data: img.base64 } }));
+        content.push({ type: 'text', text: prompt });
+        const body = { model, max_tokens: 8192, stream, messages: [{ role: 'user', content }] };
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        if (stream) {
+            return { reader: res.body.getReader(), parseChunk: (line) => { try { const d = JSON.parse(line.slice(6)); if (d.type === 'content_block_delta') return d.delta?.text || ''; return ''; } catch(e) { return ''; } }, prefix: 'data: ' };
+        }
+        const data = await res.json(); if (data.error) throw new Error(data.error.message);
+        return { text: data.content[0].text };
+    }
+
+    async function callXAI(key, model, prompt, stream, images) {
+        const body = buildOpenAIBody(model, prompt, stream, images);
+        const res = await fetch('https://api.x.ai/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        if (stream) {
+            return { reader: res.body.getReader(), parseChunk: (line) => { try { const d = JSON.parse(line.slice(6)); return d.choices?.[0]?.delta?.content || ''; } catch(e) { return ''; } }, prefix: 'data: ' };
+        }
+        const data = await res.json(); return { text: data.choices[0].message.content };
+    }
+
+    async function callGroq(key, model, prompt, stream, images) {
+        const body = buildOpenAIBody(model, prompt, stream, images);
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        if (stream) {
+            return { reader: res.body.getReader(), parseChunk: (line) => { try { const d = JSON.parse(line.slice(6)); return d.choices?.[0]?.delta?.content || ''; } catch(e) { return ''; } }, prefix: 'data: ' };
+        }
+        const data = await res.json(); return { text: data.choices[0].message.content };
+    }
+
+    /* --- チャットリフレッシュ --- */
+    function resetChatForNewCode(source) {
+        chatHistory = [];
+        document.getElementById('chat-log').innerHTML = '';
+        const msg = { id: Date.now().toString(), role: 'ai system-msg', text: source + ' からコードを読み込みました。\n修正したい点があれば教えてください。', html: false };
+        chatHistory.push(msg); saveToDB('chatHistory', chatHistory); renderMessageFromHistory(msg); rebuildConversationContext();
+    }
 
     /* --- CodeMirror 変数 --- */
     let cmView = null;
@@ -560,16 +827,15 @@
 
     /* --- API Key UI 連動 --- */
     function toggleModelSelects() {
-        const apiKey = document.getElementById('api-key').value.trim();
+        const apiKey = getCurrentApiKey();
         const chatModel = document.getElementById('chat-model');
         const codeModel = document.getElementById('code-model');
+        chatModel.disabled = false; codeModel.disabled = false;
         if (!apiKey) {
-            chatModel.disabled = true; codeModel.disabled = true;
             chatModel.title = "APIキー未設定時はProxy Worker(固定モデル)が使用されます";
             codeModel.title = "APIキー未設定時はProxy Worker(固定モデル)が使用されます";
-            chatModel.style.opacity = "0.5"; codeModel.style.opacity = "0.5";
+            chatModel.style.opacity = "0.6"; codeModel.style.opacity = "0.6";
         } else {
-            chatModel.disabled = false; codeModel.disabled = false;
             chatModel.title = ""; codeModel.title = "";
             chatModel.style.opacity = "1"; codeModel.style.opacity = "1";
         }
@@ -978,7 +1244,7 @@
         try {
             const res = await fetch('https://api.github.com/repos/' + fullName + '/contents/' + path, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3.raw' } });
             window.setCode(await res.text()); updatePreview(); closeGitHubImport(); showPage('editor', document.getElementById('tab-editor'));
-            showToast('インポートしました');
+            resetChatForNewCode('GitHub Import「' + path + '」');
         } catch (e) { document.getElementById('gh-file-status').textContent = 'エラー'; }
     }
     function backToRepoList() { document.getElementById('gh-step-repo').style.display = ''; document.getElementById('gh-step-file').style.display = 'none'; }
@@ -1060,10 +1326,40 @@
         try {
             const settings = await getFromDB('settings');
             if (settings) {
-                document.getElementById('api-key').value = settings.apiKey || '';
-                document.getElementById('user-profile').value = settings.userProfile || '';
+                if (settings.aiProvider) { document.getElementById('ai-provider').value = settings.aiProvider; }
+                onProviderChange(); // モデルセレクト再構築 + APIキー欄表示切替
+
+                // プロバイダー別APIキーの読み込み（旧形式マイグレーション対応）
+                if (settings.apiKeys) {
+                    document.getElementById('api-key-gemini').value = settings.apiKeys.gemini || '';
+                    document.getElementById('api-key-openai').value = settings.apiKeys.openai || '';
+                    document.getElementById('api-key-claude').value = settings.apiKeys.claude || '';
+                    document.getElementById('api-key-xai').value = settings.apiKeys.xai || '';
+                    document.getElementById('api-key-groq').value = settings.apiKeys.groq || '';
+                } else if (settings.apiKey) {
+                    // 旧形式: 単一キーを現在のプロバイダーに割り当てる
+                    const provider = settings.aiProvider || 'gemini';
+                    const el = document.getElementById('api-key-' + provider);
+                    if (el) el.value = settings.apiKey;
+                }
+
+                document.getElementById('user-profile').value = settings.userProfile || DEFAULT_USER_PROFILE;
+                document.getElementById('system-prompt').value = settings.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+                document.getElementById('code-principles').value = settings.codePrinciples || DEFAULT_CODE_PRINCIPLES;
+                document.getElementById('prompt-plan').value = settings.promptPlan || DEFAULT_PROMPT_PLAN;
+                document.getElementById('prompt-suggest').value = settings.promptSuggest || DEFAULT_PROMPT_SUGGEST;
+                document.getElementById('prompt-debug').value = settings.promptDebug || DEFAULT_PROMPT_DEBUG;
                 if (settings.chatModel) document.getElementById('chat-model').value = settings.chatModel;
                 if (settings.codeModel) document.getElementById('code-model').value = settings.codeModel;
+            } else {
+                onProviderChange(); // デフォルトのモデルリスト構築
+                // 初回起動: デフォルト値をプリセット
+                document.getElementById('system-prompt').value = DEFAULT_SYSTEM_PROMPT;
+                document.getElementById('user-profile').value = DEFAULT_USER_PROFILE;
+                document.getElementById('code-principles').value = DEFAULT_CODE_PRINCIPLES;
+                document.getElementById('prompt-plan').value = DEFAULT_PROMPT_PLAN;
+                document.getElementById('prompt-suggest').value = DEFAULT_PROMPT_SUGGEST;
+                document.getElementById('prompt-debug').value = DEFAULT_PROMPT_DEBUG;
             }
             toggleModelSelects();
             const ghToken = await getFromDB('gh_token');
@@ -1140,7 +1436,7 @@
     function handleCodeUpload(input) {
         const file = input.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = (e) => { window.setCode(e.target.result); updatePreview(); showToast(`「${file.name}」を読み込みました`); };
+        reader.onload = (e) => { window.setCode(e.target.result); updatePreview(); resetChatForNewCode('Upload「' + file.name + '」'); };
         reader.readAsText(file); input.value = '';
     }
 
@@ -1150,7 +1446,24 @@
     });
 
     async function saveSettings() {
-        const settings = { apiKey: document.getElementById('api-key').value, userProfile: document.getElementById('user-profile').value, chatModel: document.getElementById('chat-model').value, codeModel: document.getElementById('code-model').value };
+        const settings = {
+            aiProvider: document.getElementById('ai-provider').value,
+            apiKeys: {
+                gemini: document.getElementById('api-key-gemini').value,
+                openai: document.getElementById('api-key-openai').value,
+                claude: document.getElementById('api-key-claude').value,
+                xai: document.getElementById('api-key-xai').value,
+                groq: document.getElementById('api-key-groq').value,
+            },
+            userProfile: document.getElementById('user-profile').value,
+            chatModel: document.getElementById('chat-model').value,
+            codeModel: document.getElementById('code-model').value,
+            systemPrompt: document.getElementById('system-prompt').value,
+            codePrinciples: document.getElementById('code-principles').value,
+            promptPlan: document.getElementById('prompt-plan').value,
+            promptSuggest: document.getElementById('prompt-suggest').value,
+            promptDebug: document.getElementById('prompt-debug').value,
+        };
         const ghToken = document.getElementById('setting-gh-token').value.trim();
         await saveToDB('settings', settings);
         if (ghToken) { await saveToDB('gh_token', ghToken); document.getElementById('deploy-token-input').value = ghToken; } else { await deleteFromDB('gh_token'); document.getElementById('deploy-token-input').value = ''; }
@@ -1163,22 +1476,22 @@
 
     function askForPlan() {
         const input = document.getElementById('user-prompt');
-        input.value = "現在の会話履歴とコードを元に、次に開発すべき最適な要件やアイデアを具体的に提案してください。もし要件が不足していれば、自律的に補完して完全なプランを提示してください。";
-        askGemini();
+        const tpl = document.getElementById('prompt-suggest').value.trim() || DEFAULT_PROMPT_SUGGEST;
+        input.value = tpl;
+        askAI();
     }
 
-    async function askGemini() {
-        const key = document.getElementById('api-key').value; const prof = document.getElementById('user-profile').value; const model = document.getElementById('chat-model').value;
+    async function askAI() {
+        const prof = document.getElementById('user-profile').value;
+        const model = document.getElementById('chat-model').value;
         const input = document.getElementById('user-prompt'); const promptText = input.value.trim();
         if(!promptText && !currentFileName) return showToast('入力またはファイルが必要です');
         
-        // ユーザーメッセージ保存
         const userMsgObj = { id: Date.now().toString(), role: 'user', text: promptText, html: false };
         if(currentFileName) userMsgObj.attachment = currentFileName;
         chatHistory.push(userMsgObj); saveToDB('chatHistory', chatHistory);
         renderMessageFromHistory(userMsgObj);
         
-        // AIメッセージ領域作成
         const aiMsgId = (Date.now() + 1).toString();
         const aiMsgObj = { id: aiMsgId, role: 'ai', text: '<div style="display:flex;align-items:center;"><div class="spinner"></div><span>考案中...</span></div>', html: true };
         chatHistory.push(aiMsgObj); saveToDB('chatHistory', chatHistory);
@@ -1191,29 +1504,29 @@
 
         const currentCode = window.getCode();
         const codeContext = currentCode ? `\n\n【現在のコード】\n\`\`\`html\n${currentCode}\n\`\`\`\n※上記コードを踏まえて、内容を大きく変更せずに修正案や設計の提案を行ってください。` : "";
-        const system = `あなたはプロのWeb開発ディレクターです。ユーザーのアイディアを具体化し、実装（BUILD）に向けた設計図を作成します。\nプロファイル: ${prof}\nガイドライン: 1. アプリ名、ターゲット、機能をヒアリング。2. 簡潔に箇条書きで返答。3. コードは書かず、仕様合意に徹する。4. 仕様が固まったら「素晴らしいプランです。⚡️コードを作成 ボタンから実装を開始しましょう」と促す。5. ユーザーの要望がまだ曖昧な場合や、次のステップを提案したい場合は、会話の最後に「次に進むための要件を提案しましょうか？✨ 要件をおまかせ ボタンから次のステップを提案できます。」と応答する。${codeContext}`;
+        const sysPrompt = document.getElementById('system-prompt').value.trim();
+        const tpl = document.getElementById('prompt-plan').value.trim() || DEFAULT_PROMPT_PLAN;
+        const system = tpl.replace('{prof}', prof).replace('{codeContext}', codeContext).replace('{systemPrompt}', sysPrompt);
         
+        const images = [];
+        if (currentImageBase64 && currentMimeType) { images.push({ mime: currentMimeType, base64: currentImageBase64 }); removeAttachment(); }
+
         let aiText = "";
-        try { 
+        try {
+            const key = getCurrentApiKey();
             if (key) {
-                const userContent = { role: "user", parts: [{ text: system + "\n\n会話履歴:\n" + conversationContext }] };
-                if (currentImageBase64 && currentMimeType) { userContent.parts.push({ inline_data: { mime_type: currentMimeType, data: currentImageBase64 } }); removeAttachment(); }
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [userContent] }) });
-                if (!res.ok) throw new Error(`API Error: ${res.status}`);
-                const reader = res.body.getReader(); const decoder = new TextDecoder("utf-8"); let buffer = ""; contentDiv.innerHTML = "";
+                const result = await callLLM({ prompt: system + "\n\n会話履歴:\n" + conversationContext, stream: true, model, images });
+                const reader = result.reader; const decoder = new TextDecoder("utf-8"); let buffer = ""; contentDiv.innerHTML = "";
                 while (true) {
                     const { value, done } = await reader.read(); if (done) break;
                     buffer += decoder.decode(value, { stream: true }); const lines = buffer.split('\n'); buffer = lines.pop();
-                    for (const line of lines) { if (line.startsWith('data: ')) { try { const data = JSON.parse(line.slice(6)); const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text; if (textChunk) { aiText += textChunk; contentDiv.innerText = aiText; log.scrollTop = log.scrollHeight; } } catch (e) {} } }
+                    for (const line of lines) { if (line.startsWith(result.prefix || 'data: ')) { const chunk = result.parseChunk(line); if (chunk) { aiText += chunk; contentDiv.innerText = aiText; log.scrollTop = log.scrollHeight; } } }
                 }
             } else {
-                let combinedPrompt = system + "\n\n会話履歴:\n" + conversationContext;
-                if (currentImageBase64 && currentMimeType) { combinedPrompt += "\n[ユーザーから画像が添付されています]"; removeAttachment(); }
-                const res = await fetch(PROXY_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: combinedPrompt }) });
-                const data = await res.json(); aiText = data.candidates ? data.candidates[0].content.parts[0].text : (data.response || data.text || JSON.stringify(data)); contentDiv.innerText = aiText;
+                const result = await callLLM({ prompt: system + "\n\n会話履歴:\n" + conversationContext, stream: false, model, images });
+                aiText = result.text; contentDiv.innerText = aiText;
             }
 
-            // ストリーミング完了後の保存と再描画
             const aiMsgToUpdate = chatHistory.find(m => m.id === aiMsgId);
             if(aiMsgToUpdate) {
                 aiMsgToUpdate.text = aiText; aiMsgToUpdate.html = false;
@@ -1225,63 +1538,47 @@
     }
 
     async function generateCode() {
-        const key = document.getElementById('api-key').value; const prof = document.getElementById('user-profile').value; const model = document.getElementById('code-model').value;
+        const prof = document.getElementById('user-profile').value; const model = document.getElementById('code-model').value;
+        const sysPrompt = document.getElementById('system-prompt').value.trim();
+        const principles = document.getElementById('code-principles').value.trim();
         const currentCode = window.getCode();
         
-        const sysMsgObj = { id: Date.now().toString(), role: 'ai system-msg', text: '<div style="display:flex;align-items:center;"><div class="spinner"></div><span>構築中...（タブを閉じてもOK）</span></div>', html: true };
+        const sysMsgObj = { id: Date.now().toString(), role: 'ai system-msg', text: '<div style="display:flex;align-items:center;"><div class="spinner"></div><span>構築中...</span></div>', html: true };
         chatHistory.push(sysMsgObj); saveToDB('chatHistory', chatHistory); renderMessageFromHistory(sysMsgObj);
 
         const codeRule = currentCode ? `【重要】以下の既存コードが存在します。構造・変数名・スタイル・レイアウトを最大限維持し、会話で合意した差分のみを変更・追加してください。全面書き換えは厳禁です。\n既存コード:\n${currentCode}` : '既存コードはありません。新規に完全なコードを作成してください。';
         const themeCSS = await getSelectedThemeCSS();
         const themeRule = themeCSS ? `\n【デザインテーマ】以下のCSS変数をデザインシステムとして使用してください。:rootに含め、各要素のcolor/background等にvar()で参照してください。\n${themeCSS}` : '';
-        const system = `Expert Full-stack Web Developerとして、完全なHTML/CSS/JSコードを1つのファイルで出力してください。\nプロファイル: ${prof}\nルール: Markdownのコードブロック不要。<!DOCTYPE html>から開始。外部ライブラリはCDN使用。${themeRule}\n${codeRule}\n会話履歴: ${conversationContext}`;
+        const principlesRule = principles ? `\n【コードプリンシプル】${principles}` : '';
+        const sysRule = sysPrompt ? `\n${sysPrompt}` : '';
+        const system = `Expert Full-stack Web Developerとして、完全なHTML/CSS/JSコードを1つのファイルで出力してください。${sysRule}\nプロファイル: ${prof}\nルール: Markdownのコードブロック不要。<!DOCTYPE html>から開始。外部ライブラリはCDN使用。${principlesRule}${themeRule}\n${codeRule}\n会話履歴: ${conversationContext}`;
 
-        const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-        const targetUrl = key ? googleUrl : PROXY_WORKER_URL;
-        const targetBody = JSON.stringify(key ? { contents: [{ parts: [{ text: system }] }] } : { prompt: system });
-
-        if (swRegistration && swRegistration.active) {
-            document.getElementById('bg-notify').classList.add('show');
-            await saveToDB('bgResult', { done: false, ts: Date.now() });
-            swRegistration.active.postMessage({ type: 'generate', url: targetUrl, body: targetBody });
-            sysMsgObj.text = '<div style="display:flex;align-items:center;"><div class="spinner"></div><span>バックグラウンドで構築中... タブを閉じても処理は継続します。</span></div>';
+        try {
+            const result = await callLLM({ prompt: system, stream: false, model });
+            let code = result.text;
+            code = code.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim();
+            window.setCode(code); updatePreview(); showPage('preview', document.getElementById('tab-preview'));
+            sysMsgObj.text = '✨ 構築完了。PREVIEWを確認してください。'; sysMsgObj.html = false;
+            document.querySelector(`[data-id="${sysMsgObj.id}"] .msg-content`).textContent = sysMsgObj.text;
+            saveToDB('chatHistory', chatHistory);
+        } catch (e) {
+            sysMsgObj.text = '<span style="color:var(--danger)">エラー: ' + e.message + '</span>';
             document.querySelector(`[data-id="${sysMsgObj.id}"] .msg-content`).innerHTML = sysMsgObj.text;
             saveToDB('chatHistory', chatHistory);
-        } else {
-            try {
-                const res = await fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: targetBody });
-                const data = await res.json();  if(data.error) throw new Error(data.error.message);
-                let result = data.candidates ? data.candidates[0].content.parts[0].text : (data.response || data.text || JSON.stringify(data)); 
-                result = result.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim();
-                window.setCode(result); updatePreview(); showPage('preview', document.getElementById('tab-preview'));
-                sysMsgObj.text = '✨ 構築完了。PREVIEWを確認してください。'; sysMsgObj.html = false;
-                document.querySelector(`[data-id="${sysMsgObj.id}"] .msg-content`).textContent = sysMsgObj.text;
-                saveToDB('chatHistory', chatHistory);
-            } catch (e) {
-                sysMsgObj.text = '<span style="color:var(--danger)">エラー: ' + e.message + '</span>';
-                document.querySelector(`[data-id="${sysMsgObj.id}"] .msg-content`).innerHTML = sysMsgObj.text;
-                saveToDB('chatHistory', chatHistory);
-            }
         }
     }
 
     async function openDeployer() {
         const code = window.getCode(); if (!code) return alert("デプロイするコードがありません。");
-        const key = document.getElementById('api-key').value; const model = document.getElementById('code-model').value;
+        const model = document.getElementById('code-model').value;
         await saveToDB('pending_deploy', { code: code, readme: "" });
         const deployBtn = document.querySelector('.deploy-btn'); const originalText = deployBtn.innerHTML;
         deployBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0 6px 0 0;"></div>README...'; deployBtn.disabled = true;
 
         const readmePrompt = `以下のHTMLコードを分析し、高品質なREADME.mdを日本語で作成してください。\nコード:\n${code}`;
         try {
-            let readme = "";
-            if (key) {
-                const data = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: readmePrompt }] }] }) }).then(r=>r.json());
-                if (data.candidates?.[0]) readme = data.candidates[0].content.parts[0].text;
-            } else {
-                const data = await fetch(PROXY_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: readmePrompt }) }).then(r=>r.json());
-                readme = data.candidates ? data.candidates[0].content.parts[0].text : (data.response || data.text);
-            }
+            const result = await callLLM({ prompt: readmePrompt, stream: false, model });
+            let readme = result.text || '';
             if (readme) { readme = readme.replace(/^```markdown\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim(); await saveToDB('pending_deploy', { code: code, readme: readme }); }
         } catch (e) {}
         deployBtn.innerHTML = originalText; deployBtn.disabled = false; openGitHubDeploy();
@@ -1291,8 +1588,9 @@
         const memoText = document.getElementById('debug-memo').value.trim(); if (!memoText) return;
         showPage('chat', document.getElementById('tab-chat'));
         const chatInput = document.getElementById('user-prompt');
-        chatInput.value = `あなたはプロのWeb開発ディレクターです。次の修整依頼に対して、バグの報告かどうか判断してください。バグの場合は要因を確認してください。要因が判明したら改善策を検討してください。要因が判明しない場合は、要因切分けのためのログや反応を取得するためのコードを検討してください。最後に、前回のコード生成から現在までで修整する要件を整理してください。【修正依頼】\n${memoText}`;
-        autoGrow(chatInput); document.getElementById('debug-memo').value = ''; askGemini();
+        const tpl = document.getElementById('prompt-debug').value.trim() || DEFAULT_PROMPT_DEBUG;
+        chatInput.value = tpl.replace('{memoText}', memoText);
+        autoGrow(chatInput); document.getElementById('debug-memo').value = ''; askAI();
     }
 
     function downloadCode() {
@@ -1304,47 +1602,120 @@
     /* --- テンプレート機能 --- */
     const TEMPLATE_BASE_URL = './templates/';
     let templatesData = [];
+    let customTemplates = [];
+    let editingTemplateId = null;
 
     async function loadTemplateList() {
         const grid = document.getElementById('template-grid');
         try {
             const res = await fetch(TEMPLATE_BASE_URL + 'templates.json');
-            if (!res.ok) throw new Error('Failed to fetch');
-            templatesData = await res.json();
-            grid.innerHTML = templatesData.map(t => `
-                <div class="template-card" onclick="applyTemplate('${t.id}')" title="${t.description}">
-                    <span class="template-icon">${t.icon}</span>
-                    <div class="template-name">${t.name}</div>
-                    <div class="template-desc">${t.description}</div>
-                    <div class="template-color-bar" style="background:${t.color}"></div>
-                </div>
-            `).join('');
-        } catch (e) {
-            grid.innerHTML = '<div class="template-loading">テンプレートの読み込みに失敗しました。<br>templates/ フォルダが配置されているか確認してください。</div>';
-        }
+            if (res.ok) templatesData = await res.json();
+        } catch (e) { templatesData = []; }
+        try { customTemplates = (await getFromDB('customTemplates')) || []; } catch(e) { customTemplates = []; }
+        renderTemplateGrid();
+    }
+
+    function renderTemplateGrid() {
+        const grid = document.getElementById('template-grid');
+        const all = [...templatesData, ...customTemplates.map(t => ({ ...t, isCustom: true }))];
+        let html = all.map(t => `
+            <div class="template-card" onclick="applyTemplate('${t.id}')" title="${t.description || ''}">
+                ${t.isCustom ? `<div class="template-card-actions">
+                    <button class="theme-action-btn" onclick="event.stopPropagation();editCustomTemplate('${t.id}')" title="編集">✏</button>
+                    <button class="theme-action-btn" onclick="event.stopPropagation();deleteCustomTemplate('${t.id}')" title="削除">🗑</button>
+                </div>` : ''}
+                <span class="template-icon">${t.icon || '📄'}</span>
+                <div class="template-name">${t.name}${t.isCustom ? ' <span class="theme-badge">カスタム</span>' : ''}</div>
+                <div class="template-desc">${t.description || ''}</div>
+                ${t.color ? `<div class="template-color-bar" style="background:${t.color}"></div>` : ''}
+            </div>
+        `).join('');
+        html += `<div class="template-new-card" onclick="openTemplateEditor()">＋<span>追加</span></div>`;
+        grid.innerHTML = html;
+    }
+
+    function openTemplateEditor(existing) {
+        editingTemplateId = existing ? existing.id : null;
+        document.getElementById('tpl-editor-title').textContent = existing ? '📄 テンプレートを編集' : '📄 テンプレートを追加';
+        document.getElementById('tple-name').value = existing ? existing.name : '';
+        document.getElementById('tple-icon').value = existing ? existing.icon : '📄';
+        document.getElementById('tple-desc').value = existing ? (existing.description || '') : '';
+        document.getElementById('tple-code').value = existing ? (existing.code || '') : '';
+        document.getElementById('tpl-editor-modal').classList.add('show');
+    }
+    function closeTemplateEditor() { document.getElementById('tpl-editor-modal').classList.remove('show'); editingTemplateId = null; }
+
+    function triggerTplFileUpload() { document.getElementById('tpl-file-input').click(); }
+    function handleTplFileUpload(input) {
+        const file = input.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('tple-code').value = e.target.result;
+            if (!document.getElementById('tple-name').value) {
+                document.getElementById('tple-name').value = file.name.replace(/\.html$/i, '');
+            }
+            showToast('ファイルを読み込みました');
+        };
+        reader.readAsText(file); input.value = '';
+    }
+
+    async function saveCustomTemplate() {
+        const name = document.getElementById('tple-name').value.trim();
+        const icon = document.getElementById('tple-icon').value.trim() || '📄';
+        const desc = document.getElementById('tple-desc').value.trim();
+        const code = document.getElementById('tple-code').value;
+        if (!name) return showToast('テンプレート名を入力してください');
+        if (!code.trim()) return showToast('コードを入力またはファイルを読み込んでください');
+        const id = editingTemplateId || 'ctpl-' + Date.now();
+        const tplObj = { id, name, icon, description: desc || 'カスタムテンプレート', code };
+        if (editingTemplateId) {
+            const idx = customTemplates.findIndex(t => t.id === editingTemplateId);
+            if (idx !== -1) customTemplates[idx] = tplObj; else customTemplates.push(tplObj);
+        } else { customTemplates.push(tplObj); }
+        await saveToDB('customTemplates', customTemplates);
+        renderTemplateGrid();
+        closeTemplateEditor();
+        showToast(`テンプレート「${name}」を${editingTemplateId ? '更新' : '追加'}しました`);
+    }
+
+    function editCustomTemplate(id) {
+        const t = customTemplates.find(t => t.id === id);
+        if (t) openTemplateEditor(t);
+    }
+
+    async function deleteCustomTemplate(id) {
+        const t = customTemplates.find(t => t.id === id);
+        if (!t || !confirm(`テンプレート「${t.name}」を削除しますか？`)) return;
+        customTemplates = customTemplates.filter(t => t.id !== id);
+        await saveToDB('customTemplates', customTemplates);
+        renderTemplateGrid();
+        showToast('テンプレートを削除しました');
     }
 
     async function applyTemplate(templateId) {
-        const tpl = templatesData.find(t => t.id === templateId);
+        const allTpls = [...templatesData, ...customTemplates];
+        const tpl = allTpls.find(t => t.id === templateId);
         if (!tpl) return;
         if (window.getCode() && !confirm(`「${tpl.name}」テンプレートを読み込みます。\n現在のコードは上書きされます。よろしいですか？`)) return;
 
-        const grid = document.getElementById('template-grid');
-        const card = grid.querySelector(`[onclick="applyTemplate('${templateId}')"]`);
-        if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
-
         try {
-            const res = await fetch(TEMPLATE_BASE_URL + tpl.file);
-            if (!res.ok) throw new Error('Failed to fetch template');
-            const code = await res.text();
+            let code;
+            if (tpl.code) {
+                // カスタムテンプレート（IndexedDB保存済みコード）
+                code = tpl.code;
+            } else {
+                const res = await fetch(TEMPLATE_BASE_URL + tpl.file);
+                if (!res.ok) throw new Error('Failed to fetch template');
+                code = await res.text();
+            }
             window.setCode(code);
             updatePreview();
+            // テーマが選択済みなら自動注入
+            if (currentThemeId !== 'none') await injectThemeToCode(true);
+            resetChatForNewCode('テンプレート「' + tpl.name + '」');
             showPage('preview', document.getElementById('tab-preview'));
-            showToast(`「${tpl.name}」を読み込みました`);
         } catch (e) {
             showToast('テンプレートの読み込みに失敗しました');
-        } finally {
-            if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
         }
     }
 
@@ -1423,7 +1794,12 @@
             return;
         }
         const t = getAllThemes().find(t => t.id === themeId);
-        if (t) showToast(`テーマ「${t.name}」を選択`);
+        // コードが存在すれば即座に注入
+        if (window.getCode()) {
+            await injectThemeToCode(true);
+        } else if (t) {
+            showToast(`テーマ「${t.name}」を選択（コード生成時に反映）`);
+        }
     }
 
     // 現在のテーマのCSS文字列を取得（コード注入・プロンプト用）
@@ -1453,12 +1829,12 @@
         return t ? t.name : null;
     }
 
-    // コードにテーマCSSを注入
-    async function injectThemeToCode() {
+    // コードにテーマCSSを注入 (silent=true の場合はエラー時のみtoast)
+    async function injectThemeToCode(silent) {
         const css = await getSelectedThemeCSS();
-        if (!css) return showToast('テーマが選択されていません');
+        if (!css) { if (!silent) showToast('テーマが選択されていません'); return; }
         let code = window.getCode();
-        if (!code) return showToast('コードがありません');
+        if (!code) { if (!silent) showToast('コードがありません'); return; }
         const themeName = getSelectedThemeName() || 'Custom';
         const marker = '/* === CODE THEME: ';
         const block = `/* === CODE THEME: ${themeName} === */\n${css.trim()}\n/* === /CODE THEME === */`;
@@ -1484,7 +1860,7 @@
         }
         window.setCode(code);
         updatePreview();
-        showToast(`テーマ「${themeName}」をコードに反映しました`);
+        if (!silent) showToast(`テーマ「${themeName}」をコードに反映しました`);
     }
 
     /* --- テーマエディタ --- */
