@@ -180,6 +180,34 @@
         .template-desc { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
         .template-loading { text-align: center; padding: 30px; color: var(--color-text-secondary); font-size: 13px; }
         .template-color-bar { height: 3px; border-radius: 2px; margin-top: 12px; }
+
+        /* テーママネージャー */
+        .theme-section { margin-top: 28px; margin-bottom: 24px; }
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+        .theme-card { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--color-bg-elevated); border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .theme-card:hover { border-color: var(--color-border-focus); }
+        .theme-card.active { border-color: var(--primary); box-shadow: 0 0 12px rgba(59,130,246,0.2); }
+        .theme-preview-dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.1); }
+        .theme-card-info { min-width: 0; flex: 1; }
+        .theme-card-name { font-size: 12px; font-weight: 700; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .theme-card-desc { font-size: 10px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .theme-card-actions { position: absolute; top: 4px; right: 4px; display: none; gap: 2px; }
+        .theme-card:hover .theme-card-actions { display: flex; }
+        .theme-action-btn { background: var(--color-bg-surface); border: 1px solid var(--color-border); color: var(--color-text-secondary); width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .theme-action-btn:hover { background: var(--color-border-focus); color: #fff; }
+        .theme-new-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; background: transparent; border: 2px dashed var(--color-border); border-radius: 10px; cursor: pointer; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; transition: all 0.2s; font-family: var(--font-body); }
+        .theme-new-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .theme-badge { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--primary); color: #fff; margin-left: 4px; vertical-align: middle; }
+
+        /* テーマエディタモーダル */
+        .theme-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .theme-color-field { display: flex; flex-direction: column; gap: 4px; }
+        .theme-color-field label { font-size: 10px; color: var(--color-text-secondary); margin: 0; font-family: var(--font-body); letter-spacing: 0; }
+        .theme-color-row { display: flex; gap: 6px; align-items: center; }
+        .theme-color-input { width: 36px; height: 30px; border: none; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
+        .theme-color-hex { flex: 1; background: var(--color-bg-elevated); border: 1px solid var(--color-border); border-radius: 6px; padding: 4px 8px; color: var(--color-text-primary); font-size: 12px; font-family: var(--font-mono); outline: none; }
+        .theme-preview-bar { display: flex; border-radius: 8px; overflow: hidden; height: 32px; margin-top: 8px; border: 1px solid var(--color-border); }
+        .theme-preview-bar div { flex: 1; }
     </style>
 </head>
 <body>
@@ -286,6 +314,13 @@
             <textarea id="user-profile" class="setting-input" rows="6" placeholder="例：Tailwind CSSを使用。日本語コメント。モダンなダークモード。"></textarea>
         </div>
         <button class="save-btn" id="save-btn" onclick="saveSettings()">設定を保存</button>
+
+        <div class="theme-section">
+            <label>APP THEME</label>
+            <div id="theme-grid" class="theme-grid">
+                <div style="padding:12px;font-size:12px;color:var(--color-text-secondary);">読み込み中...</div>
+            </div>
+        </div>
 
         <div class="template-section" style="margin-top: 28px;">
             <div class="template-section-header">
@@ -413,6 +448,41 @@
 <div id="bg-notify" class="bg-notify">
     <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
     <span>バックグラウンドで生成中...</span>
+</div>
+
+<!-- Theme Editor Modal -->
+<div id="theme-editor-modal" class="modal-overlay" onclick="if(event.target===this)closeThemeEditor()">
+    <div class="modal" style="max-width:440px;">
+        <div class="modal-header">
+            <h3 id="theme-editor-title">🎨 テーマを作成</h3>
+            <button class="modal-close" onclick="closeThemeEditor()">✕</button>
+        </div>
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">テーマ名</label>
+                    <input id="te-name" class="modal-input" placeholder="My Theme" style="margin:0;">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">アイコン</label>
+                    <input id="te-icon" class="modal-input" placeholder="🎨" maxlength="4" style="margin:0;">
+                </div>
+            </div>
+            <div>
+                <label style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:block;">説明</label>
+                <input id="te-desc" class="modal-input" placeholder="カスタムテーマの説明" style="margin:0;">
+            </div>
+            <div>
+                <label style="font-size:11px; color:var(--color-text-primary); margin-bottom:8px; display:block; font-weight:700;">カラー設定</label>
+                <div class="theme-editor-grid" id="te-colors"></div>
+                <div class="theme-preview-bar" id="te-preview-bar"></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:4px;">
+                <button class="modal-btn" id="te-save-btn" onclick="saveThemeFromEditor()" style="flex:1;">💾 保存</button>
+                <button class="modal-btn" onclick="exportThemeCSS()" style="flex:0; background:var(--color-bg-elevated); width:auto; padding:10px 16px; margin-top:0;" title="CSSをエクスポート">📥</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1005,6 +1075,9 @@
         // テンプレート一覧ロード
         loadTemplateList();
 
+        // テーママネージャーロード
+        loadThemeManager();
+
         // BG復帰チェック
         try {
             const bgResult = await getFromDB('bgResult');
@@ -1264,6 +1337,254 @@
         } finally {
             if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
         }
+    }
+
+    /* --- テーママネージャー --- */
+    const THEME_BASE_URL = './themes/';
+    let presetThemes = [];
+    let customThemes = [];
+    let currentThemeId = 'default';
+    let themeStyleEl = null;
+    let editingThemeId = null;
+
+    const THEME_VARS = [
+        { key: 'color-bg-deep',       label: '背景 (深)',       default: '#0D0F14' },
+        { key: 'color-bg-surface',    label: '背景 (面)',       default: '#161920' },
+        { key: 'color-bg-elevated',   label: '背景 (浮)',       default: '#1E2433' },
+        { key: 'color-border',        label: 'ボーダー',        default: '#2A2D36' },
+        { key: 'color-border-focus',  label: 'ボーダー (F)',    default: '#4A4F5E' },
+        { key: 'color-text-primary',  label: 'テキスト (主)',   default: '#E8E4F0' },
+        { key: 'color-text-secondary',label: 'テキスト (副)',   default: '#6B7280' },
+        { key: 'primary',             label: 'プライマリ',      default: '#3b82f6' },
+        { key: 'accent',              label: 'アクセント',      default: '#8b5cf6' },
+    ];
+
+    async function loadThemeManager() {
+        // プリセット読み込み
+        try {
+            const res = await fetch(THEME_BASE_URL + 'themes.json');
+            if (res.ok) presetThemes = await res.json();
+        } catch (e) { presetThemes = [{ id:'default', name:'Obsidian Terminal', description:'デフォルト', icon:'🖤', preview:'#0D0F14', file:null }]; }
+
+        // カスタムテーマ読み込み
+        try { customThemes = (await getFromDB('customThemes')) || []; } catch(e) { customThemes = []; }
+
+        // 保存済みテーマ復元
+        try {
+            const saved = await getFromDB('appTheme');
+            if (saved) { currentThemeId = saved; await applyThemeById(saved); }
+        } catch(e) {}
+
+        renderThemeGrid();
+    }
+
+    function getAllThemes() {
+        return [...presetThemes, ...customThemes.map(t => ({ ...t, isCustom: true }))];
+    }
+
+    function renderThemeGrid() {
+        const grid = document.getElementById('theme-grid');
+        const all = getAllThemes();
+        grid.innerHTML = all.map(t => `
+            <div class="theme-card ${t.id === currentThemeId ? 'active' : ''}" onclick="selectTheme('${t.id}')">
+                <div class="theme-preview-dot" style="background:${t.preview}"></div>
+                <div class="theme-card-info">
+                    <div class="theme-card-name">${t.icon} ${t.name}${t.isCustom ? '<span class="theme-badge">カスタム</span>' : ''}</div>
+                    <div class="theme-card-desc">${t.description}</div>
+                </div>
+                ${t.isCustom ? `
+                <div class="theme-card-actions">
+                    <button class="theme-action-btn" onclick="event.stopPropagation();editTheme('${t.id}')" title="編集">✏</button>
+                    <button class="theme-action-btn" onclick="event.stopPropagation();duplicateTheme('${t.id}')" title="複製">📋</button>
+                    <button class="theme-action-btn" onclick="event.stopPropagation();deleteTheme('${t.id}')" title="削除">🗑</button>
+                </div>` : ''}
+            </div>
+        `).join('') + `<button class="theme-new-btn" onclick="openThemeEditor()">＋ 新規作成</button>`;
+    }
+
+    async function selectTheme(themeId) {
+        currentThemeId = themeId;
+        await applyThemeById(themeId);
+        await saveToDB('appTheme', themeId);
+        renderThemeGrid();
+        const t = getAllThemes().find(t => t.id === themeId);
+        if (t) showToast(`テーマ「${t.name}」を適用`);
+    }
+
+    async function applyThemeById(themeId) {
+        if (themeStyleEl) { themeStyleEl.remove(); themeStyleEl = null; }
+        if (themeId === 'default') return;
+
+        // カスタムテーマか確認
+        const custom = customThemes.find(t => t.id === themeId);
+        if (custom && custom.css) {
+            themeStyleEl = document.createElement('style');
+            themeStyleEl.id = 'dynamic-theme';
+            themeStyleEl.textContent = custom.css;
+            document.head.appendChild(themeStyleEl);
+            return;
+        }
+
+        // プリセットテーマ
+        const preset = presetThemes.find(t => t.id === themeId);
+        if (!preset || !preset.file) return;
+        try {
+            const res = await fetch(THEME_BASE_URL + preset.file);
+            if (!res.ok) throw new Error('fetch failed');
+            const css = await res.text();
+            themeStyleEl = document.createElement('style');
+            themeStyleEl.id = 'dynamic-theme';
+            themeStyleEl.textContent = css;
+            document.head.appendChild(themeStyleEl);
+        } catch (e) { showToast('テーマの読み込みに失敗'); }
+    }
+
+    /* --- テーマエディタ --- */
+    function openThemeEditor(existing) {
+        editingThemeId = existing ? existing.id : null;
+        document.getElementById('theme-editor-title').textContent = existing ? '🎨 テーマを編集' : '🎨 テーマを新規作成';
+        document.getElementById('te-name').value = existing ? existing.name : '';
+        document.getElementById('te-icon').value = existing ? existing.icon : '🎨';
+        document.getElementById('te-desc').value = existing ? existing.description : '';
+
+        const colorsDiv = document.getElementById('te-colors');
+        colorsDiv.innerHTML = THEME_VARS.map(v => {
+            const val = (existing && existing.colors && existing.colors[v.key]) || v.default;
+            return `
+            <div class="theme-color-field">
+                <label>${v.label}</label>
+                <div class="theme-color-row">
+                    <input type="color" class="theme-color-input" data-key="${v.key}" value="${val}" oninput="syncColorHex(this)">
+                    <input type="text" class="theme-color-hex" data-key="${v.key}" value="${val}" oninput="syncColorPicker(this)" maxlength="7">
+                </div>
+            </div>`;
+        }).join('');
+        updateEditorPreview();
+        document.getElementById('theme-editor-modal').classList.add('show');
+    }
+
+    function closeThemeEditor() { document.getElementById('theme-editor-modal').classList.remove('show'); editingThemeId = null; }
+
+    function syncColorHex(picker) {
+        const hex = picker.parentElement.querySelector('.theme-color-hex');
+        hex.value = picker.value;
+        updateEditorPreview();
+    }
+
+    function syncColorPicker(hex) {
+        const val = hex.value;
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            const picker = hex.parentElement.querySelector('.theme-color-input');
+            picker.value = val;
+        }
+        updateEditorPreview();
+    }
+
+    function updateEditorPreview() {
+        const bar = document.getElementById('te-preview-bar');
+        const colors = getEditorColors();
+        bar.innerHTML = [
+            colors['color-bg-deep'], colors['color-bg-surface'], colors['color-bg-elevated'],
+            colors['primary'], colors['accent'],
+            colors['color-text-primary'], colors['color-text-secondary']
+        ].map(c => `<div style="background:${c}"></div>`).join('');
+    }
+
+    function getEditorColors() {
+        const colors = {};
+        document.querySelectorAll('#te-colors .theme-color-hex').forEach(el => {
+            colors[el.dataset.key] = el.value;
+        });
+        return colors;
+    }
+
+    function buildCSSFromColors(colors) {
+        let css = ':root {\n';
+        THEME_VARS.forEach(v => {
+            if (colors[v.key]) css += `  --${v.key}: ${colors[v.key]};\n`;
+        });
+        // レガシー変数マッピング
+        css += `  --bg: ${colors['color-bg-deep']};\n`;
+        css += `  --sidebar: ${colors['color-bg-surface']};\n`;
+        css += `  --user-msg: ${colors['color-bg-elevated']};\n`;
+        css += `  --ai-msg: ${colors['color-bg-deep']};\n`;
+        css += '}\n';
+
+        // ライトテーマ判定（背景が明るい場合）
+        const bg = colors['color-bg-deep'] || '#0D0F14';
+        const r = parseInt(bg.slice(1,3),16), g = parseInt(bg.slice(3,5),16), b = parseInt(bg.slice(5,7),16);
+        if ((r*299 + g*587 + b*114) / 1000 > 128) {
+            const txt = colors['color-text-primary'] || '#1f2937';
+            css += `body { color: ${txt}; }\n`;
+            css += `.msg.ai { color: ${txt}; }\n`;
+            css += `.tab-btn { color: ${colors['color-text-secondary']}; }\n`;
+            css += `.tab-btn.active { color: ${txt}; border-bottom-color: ${txt}; }\n`;
+            css += `#user-prompt, #debug-memo { color: ${txt}; }\n`;
+            css += `textarea.setting-input, select.setting-input, input[type="password"] { color: ${txt}; }\n`;
+            css += `.theme-card-name, .template-name { color: ${txt}; }\n`;
+        }
+        return css;
+    }
+
+    async function saveThemeFromEditor() {
+        const name = document.getElementById('te-name').value.trim();
+        const icon = document.getElementById('te-icon').value.trim() || '🎨';
+        const desc = document.getElementById('te-desc').value.trim();
+        if (!name) return showToast('テーマ名を入力してください');
+
+        const colors = getEditorColors();
+        const css = buildCSSFromColors(colors);
+        const id = editingThemeId || 'custom-' + Date.now();
+
+        const themeObj = { id, name, icon, description: desc || 'カスタムテーマ', preview: colors['color-bg-deep'], colors, css };
+
+        if (editingThemeId) {
+            const idx = customThemes.findIndex(t => t.id === editingThemeId);
+            if (idx !== -1) customThemes[idx] = themeObj;
+        } else {
+            customThemes.push(themeObj);
+        }
+
+        await saveToDB('customThemes', customThemes);
+        currentThemeId = id;
+        await applyThemeById(id);
+        await saveToDB('appTheme', id);
+        renderThemeGrid();
+        closeThemeEditor();
+        showToast(`テーマ「${name}」を${editingThemeId ? '更新' : '作成'}しました`);
+    }
+
+    function editTheme(id) {
+        const t = customThemes.find(t => t.id === id);
+        if (t) openThemeEditor(t);
+    }
+
+    function duplicateTheme(id) {
+        const t = customThemes.find(t => t.id === id);
+        if (!t) return;
+        const dup = { ...t, id: 'custom-' + Date.now(), name: t.name + ' (コピー)', colors: { ...t.colors } };
+        openThemeEditor(dup);
+    }
+
+    async function deleteTheme(id) {
+        const t = customThemes.find(t => t.id === id);
+        if (!t || !confirm(`テーマ「${t.name}」を削除しますか？`)) return;
+        customThemes = customThemes.filter(t => t.id !== id);
+        await saveToDB('customThemes', customThemes);
+        if (currentThemeId === id) { currentThemeId = 'default'; await applyThemeById('default'); await saveToDB('appTheme', 'default'); }
+        renderThemeGrid();
+        showToast('テーマを削除しました');
+    }
+
+    function exportThemeCSS() {
+        const name = document.getElementById('te-name').value.trim() || 'custom-theme';
+        const colors = getEditorColors();
+        const css = buildCSSFromColors(colors);
+        const blob = new Blob([css], { type: 'text/css' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = name.replace(/\s+/g, '-').toLowerCase() + '.css';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        showToast('CSSをエクスポートしました');
     }
 </script>
 </body>
